@@ -47,7 +47,9 @@ namespace Too_little_too_much
         public TimeSpan AktualnyCzasGry => DateTime.Now - CzasRozpoczecia;
         public TimeSpan CalkowityCzasGry => (StatusGry == Status.WTrakcie) ? AktualnyCzasGry : (TimeSpan)(CzasZakonczenia - CzasRozpoczecia);
 
-        private static readonly string encryptionKey = "Bardzo-tajne-haslo-xxasjh7";
+
+        private static readonly byte[] key = Encoding.UTF8.GetBytes("your-encryption-key-1234"); 
+        private static readonly byte[] iv = Encoding.UTF8.GetBytes("your-iv-12345678");
 
         public Gra(int min, int max)
         {
@@ -119,7 +121,7 @@ namespace Too_little_too_much
                 DataContractSerializer serializer = new DataContractSerializer(typeof(Gra));
                 using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
                 {
-                    using (CryptoStream crypto = CreateCryptoStream(fileStream, CryptoStreamMode.Write))
+                    using (CryptoStream crypto = CreateCryptoStream(fileStream, key, iv, CryptoStreamMode.Write))
                     {
                         using (XmlWriter xmlWriter = XmlWriter.Create(crypto))
                         {
@@ -142,7 +144,7 @@ namespace Too_little_too_much
                 DataContractSerializer serializer = new DataContractSerializer(typeof(Gra));
                 using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
                 {
-                    using (CryptoStream crypto = CreateCryptoStream(fileStream, CryptoStreamMode.Read))
+                    using (CryptoStream crypto = CreateCryptoStream(fileStream, key, iv, CryptoStreamMode.Read))
                     {
                         return (Gra)serializer.ReadObject(crypto);
                     }
@@ -155,14 +157,15 @@ namespace Too_little_too_much
             }
         }
 
-        private static CryptoStream CreateCryptoStream(Stream stream, CryptoStreamMode mode)
+        private static CryptoStream CreateCryptoStream(Stream stream, byte[] key, byte[] iv, CryptoStreamMode mode)
         {
-            RijndaelManaged aes = new RijndaelManaged
-            {
-                Key = Encoding.UTF8.GetBytes(encryptionKey),
-                IV = Encoding.UTF8.GetBytes(encryptionKey.Substring(0, 16))
-            };
-            return new CryptoStream(stream, aes.CreateEncryptor(), mode);
+            Aes aes = Aes.Create();
+            aes.Key = key;
+            aes.IV = iv;
+            if (mode == CryptoStreamMode.Write)
+                return new CryptoStream(stream, aes.CreateEncryptor(), mode);
+            else
+                return new CryptoStream(stream, aes.CreateDecryptor(), mode);
         }
 
         public override string ToString()
