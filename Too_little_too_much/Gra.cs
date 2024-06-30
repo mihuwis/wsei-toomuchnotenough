@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -45,6 +46,8 @@ namespace Too_little_too_much
 
         public TimeSpan AktualnyCzasGry => DateTime.Now - CzasRozpoczecia;
         public TimeSpan CalkowityCzasGry => (StatusGry == Status.WTrakcie) ? AktualnyCzasGry : (TimeSpan)(CzasZakonczenia - CzasRozpoczecia);
+
+        private static readonly string encryptionKey = "Bardzo-tajne-haslo-xxasjh7";
 
         public Gra(int min, int max)
         {
@@ -116,8 +119,16 @@ namespace Too_little_too_much
                 DataContractSerializer serializer = new DataContractSerializer(typeof(Gra));
                 using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
                 {
-                    serializer.WriteObject(fileStream, this);
+                    using (CryptoStream crypto = CreateCryptoStream(fileStream, CryptoStreamMode.Write))
+                    {
+                        using (XmlWriter xmlWriter = XmlWriter.Create(crypto))
+                        {
+                            serializer.WriteObject(xmlWriter, this);
+                        }
+                    }
+
                 }
+
             } catch (Exception ex)
             {
                 Console.WriteLine($"Zapis XML sie nie udał : {ex.Message}");
@@ -131,13 +142,27 @@ namespace Too_little_too_much
                 DataContractSerializer serializer = new DataContractSerializer(typeof(Gra));
                 using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
                 {
-                    return (Gra)serializer.ReadObject(fileStream);
+                    using (CryptoStream crypto = CreateCryptoStream(fileStream, CryptoStreamMode.Read))
+                    {
+                        return (Gra)serializer.ReadObject(crypto);
+                    }
                 }
+
             }catch (Exception ex)
             {
                 Console.WriteLine($"Nie udało sie odczytac XML : {ex.Message}");
                 return null;
             }
+        }
+
+        private static CryptoStream CreateCryptoStream(Stream stream, CryptoStreamMode mode)
+        {
+            RijndaelManaged aes = new RijndaelManaged
+            {
+                Key = Encoding.UTF8.GetBytes(encryptionKey),
+                IV = Encoding.UTF8.GetBytes(encryptionKey.Substring(0, 16))
+            };
+            return new CryptoStream(stream, aes.CreateEncryptor(), mode);
         }
 
         public override string ToString()
