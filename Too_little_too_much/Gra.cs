@@ -1,70 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Xml;
 
 namespace Too_little_too_much
 {
+    [DataContract]
     public class Gra
     {
-        /// <summary>
-        /// Górne ograniczenie losowanej liczby, która ma zostać odgadnięta.
-        /// </summary>
-        /// <value>
-        /// Domyślna wartość wynosi 100. Wartość jest ustawiana w konstruktorze i nie może zmienić się podczas życia obiektu gry.
-        /// </value>
-        public int MaxLiczbaDoOdgadniecia { get; } = 100;
-
-        /// <summary>
-        /// Dolne ograniczenie losowanej liczby, która ma zostać odgadnięta.
-        /// </summary>
-        /// <value>
-        /// Domyślna wartość wynosi 1. Wartość jest ustawiana w konstruktorze i nie może zmienić się podczas życia obiektu gry.
-        /// </value>
-        public int MinLiczbaDoOdgadniecia { get; } = 1;
-
-
+        [DataMember]
+        public int MaxLiczbaDoOdgadniecia { get; private set; }
+        [DataMember]
+        public int MinLiczbaDoOdgadniecia { get; private set; }
+        [DataMember]
         readonly private int liczbaDoOdgadniecia;
 
-
-        /// <summary>
-        /// Typ wyliczeniowy opisujący możliwe statusy gry.
-        /// </summary>
         public enum Status
         {
-            /// <summary>Status gry ustawiany w momencie utworzenia obiektu gry. Zmiana tego statusu mozliwa albo gdy liczba zostanie odgadnieta, albo jawnie przerwana przez gracza.</summary>
             WTrakcie,
-            /// <summary>Status gry ustawiany w momencie odgadnięcia poszukiwanej liczby.</summary>
             Zakonczona,
-            /// <summary>Status gry ustawiany w momencie jawnego przerwania gry przez gracza.</summary>
-            Poddana
+            Poddana,
+            Zawieszona
         };
 
-        /// <summary>
-        /// Właściwość tylko do odczytu opisujaca aktualny status (<see cref="Status"/>) gry.
-        /// </summary>
         /// <remarks>
         /// <para>W momencie utworzenia obiektu, uruchomienia konstruktora, zmienna przyjmuje wartość <see cref="Gra.Status.WTrakcie"/>.</para>
         /// <para>Zmiana wartości zmiennej na <see cref="Gra.Status.Poddana"/> po uruchomieniu metody <see cref="Przerwij"/>.</para>
         /// <para>Zmiana wartości zmiennej na <see cref="Gra.Status.Zakonczona"/> w metodzie <see cref="Propozycja(int)"/>, po podaniu poprawnej, odgadywanej liczby.</para>
         /// </remarks>
+        [DataMember]
         public Status StatusGry { get; private set; }
 
-
+        [DataMember]
         private List<Ruch> listaRuchow;
 
         public IReadOnlyList<Ruch> ListaRuchow { get { return listaRuchow.AsReadOnly(); } }
 
-        /// <summary>
-        /// Czas rozpoczęcia gry, ustawiany w momencie utworzenia obiektu gry, w konstruktorze. Nie można go już zmodyfikować podczas życia obiektu.
-        /// </summary>
-        public DateTime CzasRozpoczecia { get; }
+        [DataMember]
+        public DateTime CzasRozpoczecia { get; private set; }
+
+        [DataMember]
         public DateTime? CzasZakonczenia { get; private set; }
 
-        /// <summary>
-        /// Zwraca aktualny stan gry, od chwili jej utworzenia (wywołania konstruktora) do momentu wywołania tej własciwości.
-        /// </summary>
         public TimeSpan AktualnyCzasGry => DateTime.Now - CzasRozpoczecia;
         public TimeSpan CalkowityCzasGry => (StatusGry == Status.WTrakcie) ? AktualnyCzasGry : (TimeSpan)(CzasZakonczenia - CzasRozpoczecia);
 
@@ -86,12 +68,6 @@ namespace Too_little_too_much
 
         public Gra() : this(1, 100) { }
 
-
-        /// <summary>
-        /// Każde zadanie pytania o wynik skutkuje dopisaniem do listy
-        /// </summary>
-        /// <param name="pytanie"></param>
-        /// <returns></returns>
         public Odpowiedz Ocena(int pytanie)
         {
             Odpowiedz odp;
@@ -122,7 +98,7 @@ namespace Too_little_too_much
             {
                 StatusGry = Status.Poddana;
                 CzasZakonczenia = DateTime.Now;
-                listaRuchow.Add(new Ruch(null, null, Status.WTrakcie));
+                listaRuchow.Add(new Ruch(null, null, Status.Poddana));
             }
 
             return liczbaDoOdgadniecia;
@@ -137,12 +113,48 @@ namespace Too_little_too_much
             ZaDuzo = 1
         };
 
+        public void ZapiszGreXml(string filePath)
+        {
+            try
+            {
+                DataContractSerializer serializer = new DataContractSerializer(typeof(Gra));
+                using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    serializer.WriteObject(fileStream, this);
+                }
+            } catch (Exception ex)
+            {
+                Console.WriteLine($"Zapis XML sie nie udał : {ex.Message}");
+            }
+        }
+
+        public static Gra OdczytZXML(string filePath)
+        {
+            try
+            {
+                DataContractSerializer serializer = new DataContractSerializer(typeof(Gra));
+                using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
+                {
+                    return (Gra)serializer.ReadObject(fileStream);
+                }
+            }catch (Exception ex)
+            {
+                Console.WriteLine($"Nie udało sie odczytac XML : {ex.Message}");
+                return null;
+            }
+        }
+
+        [DataContract]
         public class Ruch
         {
-            public int? Liczba { get; }
-            public Odpowiedz? Wynik { get; }
-            public Status StatusGry { get; }
-            public DateTime Czas { get; }
+            [DataMember]
+            public int? Liczba { get; private set; }
+            [DataMember]
+            public Odpowiedz? Wynik { get; private set; }
+            [DataMember]
+            public Status StatusGry { get; private set; }
+            [DataMember]
+            public DateTime Czas { get; private set; }
 
             public Ruch(int? propozycja, Odpowiedz? odp, Status statusGry)
             {
@@ -157,6 +169,7 @@ namespace Too_little_too_much
                 return $"({Liczba}, {Wynik}, {Czas}, {StatusGry})";
             }
         }
+
 
 
     }

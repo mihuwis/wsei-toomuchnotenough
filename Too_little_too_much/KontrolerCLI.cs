@@ -11,6 +11,7 @@ namespace Too_little_too_much
     public class KontrolerCLI
     {
         public const char ZNAK_ZAKONCZENIA_GRY = 'X';
+        private const string PLIK_SAVE = "save.xml";
 
         private Gra gra;
         private WidokCLI widok;
@@ -26,8 +27,29 @@ namespace Too_little_too_much
 
         public KontrolerCLI()
         {
-            gra = new Gra();
             widok = new WidokCLI(this);
+            if (File.Exists(PLIK_SAVE))
+            {
+                gra = Gra.OdczytZXML(PLIK_SAVE);
+                if(gra != null)
+                {
+                    Console.WriteLine("Odczytano stan poprzedniej gry.");
+
+                    if (widok.ChceszKontynuowac("Czy chcesz kontynuować poprzednią grę (t/n)? "))
+                    {
+                        File.Delete(PLIK_SAVE);
+                    }
+                    else
+                    {
+                        gra = new Gra();
+                        File.Delete(PLIK_SAVE);
+                    }
+                }else
+                {
+                    gra = new Gra();
+                }
+            } else { gra = new Gra(); }
+
         }
 
         public void Uruchom()
@@ -55,12 +77,11 @@ namespace Too_little_too_much
                 }
                 catch (KoniecGryException)
                 {
-                    Console.WriteLine("mam wyjatek");
+                    Console.WriteLine("Kończymy grę?");
                     gra.Przerwij();
-                    //ZakonczGre();
+                    ZapiszStanGry();
+                    return;
                 }
-
-                Console.WriteLine(propozycja);
 
                 if (gra.StatusGry == Gra.Status.Poddana) break;
 
@@ -88,7 +109,10 @@ namespace Too_little_too_much
             //if StatusGry == Zakończona wypisz statystyki gry
         }
 
-        ///////////////////////
+        private void ZapiszStanGry()
+        {
+            gra.ZapiszGreXml(PLIK_SAVE);
+        }
 
         public void UstawZakresDoLosowania(ref int min, ref int max)
         {
