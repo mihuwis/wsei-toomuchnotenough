@@ -9,8 +9,6 @@ namespace Too_little_too_much
 {
     public class WidokCLI
     {
-        public const char ZNAK_ZAKONCZENIA_GRY = 'X';
-
         private KontrolerCLI kontroler;
 
         public WidokCLI(KontrolerCLI kontroler) => this.kontroler = kontroler;
@@ -22,19 +20,19 @@ namespace Too_little_too_much
         public int WczytajPropozycje()
         {
             int wynik = 0;
-            bool sukces = false;
-            while (!sukces)
+            bool empty = true;
+            while (empty)
             {
                 Write("Podaj swoją propozycję (lub " + KontrolerCLI.ZNAK_ZAKONCZENIA_GRY + " aby przerwać): ");
                 try
                 {
                     string value = ReadLine().TrimStart().ToUpper();
-                    if (value.Length > 0 && value[0].Equals(ZNAK_ZAKONCZENIA_GRY))
+                    if (value.Length > 0 && value[0].Equals(KontrolerCLI.ZNAK_ZAKONCZENIA_GRY))
                         throw new KoniecGryException();
 
                     //UWAGA: ponizej może zostać zgłoszony wyjątek 
                     wynik = Int32.Parse(value);
-                    sukces = true;
+                    empty = false;
                 }
                 catch (FormatException)
                 {
@@ -57,8 +55,9 @@ namespace Too_little_too_much
 
         public void OpisGry()
         {
-            WriteLine("Gra w \"Za dużo za mało\"." + Environment.NewLine
-                + "Twoimm zadaniem jest odgadnąć liczbę, którą wylosował komputer." + Environment.NewLine + "Na twoje propozycje komputer odpowiada: za dużo, za mało albo trafiłeś");
+            WriteLine("Gra w \"Za dużo za mało\". \n" 
+                + "Twoimm zadaniem jest odgadnąć liczbę, którą wylosował komputer.\n" 
+                + "Na twoje propozycje komputer odpowiada: za dużo, za mało albo trafiłeś");
         }
 
         public bool ChceszKontynuowac(string prompt)
