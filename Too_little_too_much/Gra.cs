@@ -19,6 +19,7 @@ namespace Too_little_too_much
         public int MinLiczbaDoOdgadniecia { get; private set; }
         [DataMember]
         readonly private int liczbaDoOdgadniecia;
+        public int LiczbaDoOdgadniecia => liczbaDoOdgadniecia;
 
         public enum Status
         {
@@ -28,11 +29,6 @@ namespace Too_little_too_much
             Zawieszona
         };
 
-        /// <remarks>
-        /// <para>W momencie utworzenia obiektu, uruchomienia konstruktora, zmienna przyjmuje wartość <see cref="Gra.Status.WTrakcie"/>.</para>
-        /// <para>Zmiana wartości zmiennej na <see cref="Gra.Status.Poddana"/> po uruchomieniu metody <see cref="Przerwij"/>.</para>
-        /// <para>Zmiana wartości zmiennej na <see cref="Gra.Status.Zakonczona"/> w metodzie <see cref="Propozycja(int)"/>, po podaniu poprawnej, odgadywanej liczby.</para>
-        /// </remarks>
         [DataMember]
         public Status StatusGry { get; private set; }
 
@@ -98,7 +94,7 @@ namespace Too_little_too_much
             {
                 StatusGry = Status.Poddana;
                 CzasZakonczenia = DateTime.Now;
-                listaRuchow.Add(new Ruch(null, null, Status.Poddana));
+                listaRuchow.Add(new Ruch(null, null, Status.Zawieszona));
             }
 
             return liczbaDoOdgadniecia;
@@ -144,6 +140,11 @@ namespace Too_little_too_much
             }
         }
 
+        public override string ToString()
+        {
+            return $"(Status: {StatusGry}, do Odgadniecia: {LiczbaDoOdgadniecia}, count: {listaRuchow.Count()}";
+        }
+
         [DataContract]
         public class Ruch
         {
@@ -158,10 +159,10 @@ namespace Too_little_too_much
 
             public Ruch(int? propozycja, Odpowiedz? odp, Status statusGry)
             {
-                this.Liczba = propozycja;
-                this.Wynik = odp;
-                this.StatusGry = statusGry;
-                this.Czas = DateTime.Now;
+                Liczba = propozycja;
+                Wynik = odp;
+                StatusGry = statusGry;
+                Czas = DateTime.Now;
             }
 
             public override string ToString()

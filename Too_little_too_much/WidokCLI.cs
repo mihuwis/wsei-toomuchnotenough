@@ -46,11 +46,7 @@ namespace Too_little_too_much
                     WriteLine("Przesadziłeś. Podana przez Ciebie wartość jest zła! Spróbuj raz jeszcze.");
                     continue;
                 }
-                //catch (Exception)
-                //{
-                //    WriteLine("Nieznany błąd! Spróbuj raz jeszcze.");
-                //    continue;
-                //}
+
             }
             return wynik;
         }

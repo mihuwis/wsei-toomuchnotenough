@@ -32,21 +32,15 @@ namespace Too_little_too_much
             {
                 Console.WriteLine("wczytuje gierkę--------");
                 gra = Gra.OdczytZXML(PLIK_SAVE);
-                if(gra != null)
+                Console.WriteLine("czy jest null????");
+                if (gra != null)
                 {
+                    Console.WriteLine("NIE jest null!!!!");
+                    Console.WriteLine(gra.ToString());
                     Console.WriteLine("Odczytano stan poprzedniej gry.");
-                    File.Delete(PLIK_SAVE);
-                    //if (widok.ChceszKontynuowac("Czy chcesz kontynuować poprzednią grę (t/n)? "))
-                    //{
-                    //    File.Delete(PLIK_SAVE);
-                    //}
-                    //else
-                    //{
-                    //    gra = new Gra();
-                    //    File.Delete(PLIK_SAVE);
-                    //}
                 }else
                 {
+                    Console.WriteLine("Nie udało się odczytać stanu gry. Rozpoczynam nową grę.");
                     gra = new Gra();
                 }
             } else { gra = new Gra(); }
@@ -63,14 +57,18 @@ namespace Too_little_too_much
         public void UruchomRozgrywke()
         {
             widok.CzyscEkran();
-            // ustaw zakres do losowania
 
-
-            gra = new Gra(MinZakres, MaxZakres); //może zgłosić ArgumentException
+            if (gra.StatusGry == Gra.Status.WTrakcie || gra.StatusGry == Gra.Status.Zawieszona)
+            {
+                Console.WriteLine("Jedziemy! Kochaniii!!!");
+            }
+            else
+            {
+                gra = new Gra();
+            }
 
             do
             {
-                //wczytaj propozycję
                 int propozycja = 0;
                 try
                 {
@@ -79,15 +77,13 @@ namespace Too_little_too_much
                 catch (KoniecGryException)
                 {
                     Console.WriteLine("Kończymy grę?");
-                    gra.Przerwij();
                     ZapiszStanGry();
+                    gra.Przerwij();
                     return;
                 }
 
                 if (gra.StatusGry == Gra.Status.Poddana) break;
 
-                //Console.WriteLine( gra.Ocena(propozycja) );
-                //oceń propozycję, break
                 switch (gra.Ocena(propozycja))
                 {
                     case ZaDuzo:
@@ -105,9 +101,6 @@ namespace Too_little_too_much
                 widok.HistoriaGry();
             }
             while (gra.StatusGry == Gra.Status.WTrakcie);
-
-            //if StatusGry == Przerwana wypisz poprawną odpowiedź
-            //if StatusGry == Zakończona wypisz statystyki gry
         }
 
         private void ZapiszStanGry()
@@ -115,20 +108,11 @@ namespace Too_little_too_much
             gra.ZapiszGreXml(PLIK_SAVE);
         }
 
-        public void UstawZakresDoLosowania(ref int min, ref int max)
-        {
-
-        }
-
-        public int LiczbaProb() => gra.ListaRuchow.Count();
-
         public void ZakonczGre()
         {
-            //np. zapisuje stan gry na dysku w celu późniejszego załadowania
-            //albo dopisuje wynik do Top Score
-            //sprząta pamięć
+
             gra = null;
-            widok.CzyscEkran(); //komunikat o końcu gry
+            widok.CzyscEkran();
             widok = null;
             System.Environment.Exit(0);
         }
@@ -138,27 +122,6 @@ namespace Too_little_too_much
             gra.Przerwij();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="defaultValue"></param>
-        /// <exception cref="KoniecGryException"></exception>
-        /// <exception cref="FormatException"></exception>
-        /// <exception cref="OverflowException"></exception>
-        /// <returns></returns>
-        public int WczytajLiczbeLubKoniec(string value, int defaultValue)
-        {
-            if (string.IsNullOrEmpty(value))
-                return defaultValue;
-
-            value = value.TrimStart().ToUpper();
-            if (value.Length > 0 && value[0].Equals(ZNAK_ZAKONCZENIA_GRY))
-                throw new KoniecGryException();
-
-            //UWAGA: ponizej może zostać zgłoszony wyjątek 
-            return Int32.Parse(value);
-        }
     }
 
     [Serializable]
