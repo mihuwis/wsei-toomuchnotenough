@@ -27,29 +27,30 @@ namespace Too_little_too_much
 
         public KontrolerCLI()
         {
-            widok = new WidokCLI(this);
+
             if (File.Exists(PLIK_SAVE))
             {
+                Console.WriteLine("wczytuje gierkę--------");
                 gra = Gra.OdczytZXML(PLIK_SAVE);
                 if(gra != null)
                 {
                     Console.WriteLine("Odczytano stan poprzedniej gry.");
-
-                    if (widok.ChceszKontynuowac("Czy chcesz kontynuować poprzednią grę (t/n)? "))
-                    {
-                        File.Delete(PLIK_SAVE);
-                    }
-                    else
-                    {
-                        gra = new Gra();
-                        File.Delete(PLIK_SAVE);
-                    }
+                    File.Delete(PLIK_SAVE);
+                    //if (widok.ChceszKontynuowac("Czy chcesz kontynuować poprzednią grę (t/n)? "))
+                    //{
+                    //    File.Delete(PLIK_SAVE);
+                    //}
+                    //else
+                    //{
+                    //    gra = new Gra();
+                    //    File.Delete(PLIK_SAVE);
+                    //}
                 }else
                 {
                     gra = new Gra();
                 }
             } else { gra = new Gra(); }
-
+            widok = new WidokCLI(this);
         }
 
         public void Uruchom()
