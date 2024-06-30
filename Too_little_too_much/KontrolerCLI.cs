@@ -15,6 +15,7 @@ namespace Too_little_too_much
 
         private Gra gra;
         private WidokCLI widok;
+        private Timer backupTimer;
 
         public int MinZakres { get; private set; } = 1;
         public int MaxZakres { get; private set; } = 100;
@@ -32,11 +33,8 @@ namespace Too_little_too_much
             {
                 Console.WriteLine("wczytuje gierkę--------");
                 gra = Gra.OdczytZXML(PLIK_SAVE);
-                Console.WriteLine("czy jest null????");
                 if (gra != null)
                 {
-                    Console.WriteLine("NIE jest null!!!!");
-                    Console.WriteLine(gra.ToString());
                     Console.WriteLine("Odczytano stan poprzedniej gry.");
                 }else
                 {
@@ -45,13 +43,15 @@ namespace Too_little_too_much
                 }
             } else { gra = new Gra(); }
             widok = new WidokCLI(this);
+            StartAutoBackup();
         }
 
         public void Uruchom()
         {
             widok.OpisGry();
-            while (widok.ChceszKontynuowac("Czy chcesz kontynuować aplikację (t/n)? "))
+            while (widok.ChceszKontynuowac("Czy chcesz kontynuować gre (t/n)? "))
                 UruchomRozgrywke();
+            StopAutoBackup();
         }
 
         public void UruchomRozgrywke()
@@ -60,7 +60,7 @@ namespace Too_little_too_much
 
             if (gra.StatusGry == Gra.Status.WTrakcie || gra.StatusGry == Gra.Status.Zawieszona)
             {
-                Console.WriteLine("Jedziemy! Kochaniii!!!");
+                Console.WriteLine("Jedziemy Kochaniii!!!");
             }
             else
             {
@@ -76,7 +76,6 @@ namespace Too_little_too_much
                 }
                 catch (KoniecGryException)
                 {
-                    Console.WriteLine("Kończymy grę?");
                     ZapiszStanGry();
                     gra.Przerwij();
                     return;
@@ -110,7 +109,7 @@ namespace Too_little_too_much
 
         public void ZakonczGre()
         {
-
+            StopAutoBackup();
             gra = null;
             widok.CzyscEkran();
             widok = null;
@@ -121,6 +120,22 @@ namespace Too_little_too_much
         {
             gra.Przerwij();
         }
+
+        private void StartAutoBackup()
+        {
+            backupTimer = new Timer(SaveState, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
+        }
+
+        private void StopAutoBackup()
+        {
+            backupTimer?.Dispose();
+        }
+
+        private void SaveState(object state)
+        {
+            ZapiszStanGry();
+        }
+
 
     }
 
