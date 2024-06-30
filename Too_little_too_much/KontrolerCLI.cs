@@ -28,7 +28,7 @@ namespace Too_little_too_much
 
         public KontrolerCLI()
         {
-
+            widok = new WidokCLI(this);
             if (File.Exists(PLIK_SAVE))
             {
                 Console.WriteLine("wczytuje gierkę--------");
@@ -36,13 +36,22 @@ namespace Too_little_too_much
                 if (gra != null)
                 {
                     Console.WriteLine("Odczytano stan poprzedniej gry.");
+                    if(widok.ChceszKontynuowac("Wczytać poprzednią grę? (t/n)?"))
+                    {
+                        Console.WriteLine("Odczytano stan poprzedniej gry.");
+                    }
+                    else 
+                    {
+                        File.Delete(PLIK_SAVE);
+                        gra = new Gra();
+                    }
                 }else
                 {
                     Console.WriteLine("Nie udało się odczytać stanu gry. Rozpoczynam nową grę.");
                     gra = new Gra();
                 }
             } else { gra = new Gra(); }
-            widok = new WidokCLI(this);
+            
             StartAutoBackup();
         }
 
