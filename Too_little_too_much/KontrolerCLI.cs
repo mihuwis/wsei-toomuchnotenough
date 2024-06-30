@@ -55,7 +55,9 @@ namespace Too_little_too_much
                 }
                 catch (KoniecGryException)
                 {
+                    Console.WriteLine("mam wyjatek");
                     gra.Przerwij();
+                    //ZakonczGre();
                 }
 
                 Console.WriteLine(propozycja);

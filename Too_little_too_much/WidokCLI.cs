@@ -22,8 +22,8 @@ namespace Too_little_too_much
         public int WczytajPropozycje()
         {
             int wynik = 0;
-            bool sukces = false;
-            while (!sukces)
+            bool empty = true;
+            while (empty)
             {
                 Write("Podaj swoją propozycję (lub " + KontrolerCLI.ZNAK_ZAKONCZENIA_GRY + " aby przerwać): ");
                 try
@@ -34,7 +34,7 @@ namespace Too_little_too_much
 
                     //UWAGA: ponizej może zostać zgłoszony wyjątek 
                     wynik = Int32.Parse(value);
-                    sukces = true;
+                    empty = false;
                 }
                 catch (FormatException)
                 {
@@ -46,11 +46,11 @@ namespace Too_little_too_much
                     WriteLine("Przesadziłeś. Podana przez Ciebie wartość jest zła! Spróbuj raz jeszcze.");
                     continue;
                 }
-                catch (Exception)
-                {
-                    WriteLine("Nieznany błąd! Spróbuj raz jeszcze.");
-                    continue;
-                }
+                //catch (Exception)
+                //{
+                //    WriteLine("Nieznany błąd! Spróbuj raz jeszcze.");
+                //    continue;
+                //}
             }
             return wynik;
         }
