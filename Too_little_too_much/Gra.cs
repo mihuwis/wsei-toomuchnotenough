@@ -75,12 +75,13 @@ namespace Too_little_too_much
         public Odpowiedz Ocena(int pytanie)
         {
             Odpowiedz odp;
+            DateTime teraz = DateTime.Now;
             if (pytanie == liczbaDoOdgadniecia)
             {
                 odp = Odpowiedz.Trafiony;
                 StatusGry = Status.Zakonczona;
-                CzasZakonczenia = DateTime.Now;
-                listaRuchow.Add(new Ruch(pytanie, odp, Status.Zakonczona));
+                CzasZakonczenia = teraz;
+                listaRuchow.Add(new Ruch(pytanie, odp, Status.Zakonczona, teraz, CzasRuchu(teraz)));
             }
             else if (pytanie < liczbaDoOdgadniecia)
                 odp = Odpowiedz.ZaMalo;
@@ -90,10 +91,18 @@ namespace Too_little_too_much
             //dopisz do listy
             if (StatusGry == Status.WTrakcie)
             {
-                listaRuchow.Add(new Ruch(pytanie, odp, Status.WTrakcie));
+                listaRuchow.Add(new Ruch(pytanie, odp, Status.WTrakcie, teraz, CzasRuchu(teraz)));
             }
 
             return odp;
+        }
+
+        private TimeSpan CzasRuchu(DateTime czasRuchu)
+        {
+            if (listaRuchow.Count == 0)
+                return czasRuchu - CzasRozpoczecia;
+
+            return czasRuchu - listaRuchow[^1].Czas;
         }
 
         public int Przerwij()
@@ -102,7 +111,7 @@ namespace Too_little_too_much
             {
                 StatusGry = Status.Poddana;
                 CzasZakonczenia = DateTime.Now;
-                listaRuchow.Add(new Ruch(null, null, Status.Zawieszona));
+                listaRuchow.Add(new Ruch(null, null, Status.Zawieszona, DateTime.Now, TimeSpan.Zero));
             }
 
             return liczbaDoOdgadniecia;
@@ -122,13 +131,11 @@ namespace Too_little_too_much
             if (index == 0)
             {
                 TimeSpan czasRuchu = listaRuchow[index].Czas - CzasRozpoczecia;
-                Console.WriteLine($"Czas ruchu dla indeksu 0: {czasRuchu.TotalSeconds} s");
                 return czasRuchu;
             }
             else
             {
                 TimeSpan czasRuchu = listaRuchow[index].Czas - listaRuchow[index - 1].Czas;
-                Console.WriteLine($"Czas ruchu dla indeksu {index}: {czasRuchu.TotalSeconds} s");
                 return czasRuchu;
             }
         }
@@ -227,18 +234,21 @@ namespace Too_little_too_much
             public Status StatusGry { get; private set; }
             [DataMember]
             public DateTime Czas { get; private set; }
+            [DataMember]
+            public TimeSpan CzasRuchu { get; private set; }
 
-            public Ruch(int? propozycja, Odpowiedz? odp, Status statusGry)
+            public Ruch(int? propozycja, Odpowiedz? odp, Status statusGry, DateTime czas, TimeSpan czasRuchu)
             {
                 Liczba = propozycja;
                 Wynik = odp;
                 StatusGry = statusGry;
                 Czas = DateTime.Now;
+                CzasRuchu = czasRuchu;
             }
 
             public override string ToString()
             {
-                return $"({Liczba}, {Wynik}, {Czas}, {StatusGry})";
+                return $"({Liczba}, {Wynik}, {Czas}, {StatusGry} {CzasRuchu.TotalSeconds} s)";
             }
         }
 

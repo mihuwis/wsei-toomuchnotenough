@@ -78,8 +78,7 @@ namespace Too_little_too_much
             int i = 1;
             foreach (var ruch in kontroler.ListaRuchow)
             {
-                TimeSpan czasRuchu = kontroler.gra.ObliczCzasRuchu(i - 1);
-                WriteLine($"{i}     {ruch.Liczba}      {ruch.Wynik}      {czasRuchu.TotalSeconds} s     {ruch.StatusGry}");
+                WriteLine($"{i}     {ruch.Liczba}      {ruch.Wynik}      {ruch.CzasRuchu} s     {ruch.StatusGry}");
                 i++;
             }
         }
