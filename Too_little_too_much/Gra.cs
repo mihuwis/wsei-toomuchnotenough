@@ -114,21 +114,25 @@ namespace Too_little_too_much
             ZaDuzo = 1
         };
 
+        public TimeSpan ObliczCzasRuchu(int index)
+        {
+            if (index == 0)
+            {
+                return listaRuchow[index].Czas - CzasRozpoczecia;
+            }
+            else
+            {
+                return listaRuchow[index].Czas - listaRuchow[index -1].Czas;
+            }
+        }
+
         public TimeSpan SumarycznyCzasRuchow()
         {
             TimeSpan time = TimeSpan.Zero;
 
-            if(listaRuchow.Count > 1)
+            for(int i = 0; i < listaRuchow.Count; i++) 
             {
-                for (int i = listaRuchow.Count - 1; i < 1; i--)
-                {
-                    Console.WriteLine("Previous " + listaRuchow[i].Czas);
-                    Console.WriteLine("This move " + listaRuchow[i-1].Czas);
-                    TimeSpan durationOfMove = listaRuchow[i].Czas - listaRuchow[i - 1].Czas;
-                    Console.WriteLine("Duration" + durationOfMove);
-                    time += durationOfMove;
-                    Console.WriteLine("time total" + time);
-                }
+                time += ObliczCzasRuchu(i);
             }
             return time;
         }

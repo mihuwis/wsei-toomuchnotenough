@@ -13,7 +13,7 @@ namespace Too_little_too_much
         public const char ZNAK_ZAKONCZENIA_GRY = 'X';
         private const string PLIK_SAVE = "save.xml";
 
-        private Gra gra;
+        public Gra gra;
         private WidokCLI widok;
         private Timer backupTimer;
 
@@ -106,8 +106,10 @@ namespace Too_little_too_much
                         Console.WriteLine(gra.SumarycznyCzasRuchow());
                         break;
                     case Trafiony:
-                        widok.KomunikatTrafiono();
+                        TimeSpan sumarycznyCzas = gra.SumarycznyCzasRuchow();
+                        widok.KomunikatTrafiono(sumarycznyCzas);
                         Console.WriteLine(gra.SumarycznyCzasRuchow());
+                        File.Delete(PLIK_SAVE);
                         break;
                     default:
                         break;

@@ -78,7 +78,8 @@ namespace Too_little_too_much
             int i = 1;
             foreach (var ruch in kontroler.ListaRuchow)
             {
-                WriteLine($"{i}     {ruch.Liczba}      {ruch.Wynik}  {ruch.Czas.Second}   {ruch.StatusGry}");
+                TimeSpan czasRuchu = kontroler.gra.ObliczCzasRuchu(i-1);
+                WriteLine($"{i}     {ruch.Liczba}      {ruch.Wynik}      {czasRuchu.TotalSeconds} s     {ruch.StatusGry}");
                 i++;
             }
         }
@@ -97,10 +98,11 @@ namespace Too_little_too_much
             Console.ResetColor();
         }
 
-        public void KomunikatTrafiono()
+        public void KomunikatTrafiono(TimeSpan sumarycznyCzasGry)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             WriteLine("Trafiono!");
+            WriteLine($"Czas gry: {sumarycznyCzasGry} sekund");
             Console.ResetColor();
         }
     }
