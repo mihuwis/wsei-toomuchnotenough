@@ -32,6 +32,7 @@ namespace Too_little_too_much
             if (File.Exists(PLIK_SAVE))
             {
                 Console.WriteLine("wczytuje gierkę--------");
+
                 gra = Gra.OdczytZXML(PLIK_SAVE);
                 if (gra != null)
                 {
@@ -96,12 +97,17 @@ namespace Too_little_too_much
                 {
                     case ZaDuzo:
                         widok.KomunikatZaDuzo();
+                        Console.WriteLine(gra.ToString());
+                        Console.WriteLine(gra.SumarycznyCzasRuchow());
                         break;
                     case ZaMalo:
                         widok.KomunikatZaMalo();
+                        Console.WriteLine(gra.ToString());
+                        Console.WriteLine(gra.SumarycznyCzasRuchow());
                         break;
                     case Trafiony:
                         widok.KomunikatTrafiono();
+                        Console.WriteLine(gra.SumarycznyCzasRuchow());
                         break;
                     default:
                         break;

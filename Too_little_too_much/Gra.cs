@@ -114,6 +114,25 @@ namespace Too_little_too_much
             ZaDuzo = 1
         };
 
+        public TimeSpan SumarycznyCzasRuchow()
+        {
+            TimeSpan time = TimeSpan.Zero;
+
+            if(listaRuchow.Count > 1)
+            {
+                for (int i = listaRuchow.Count - 1; i < 1; i--)
+                {
+                    Console.WriteLine("Previous " + listaRuchow[i].Czas);
+                    Console.WriteLine("This move " + listaRuchow[i-1].Czas);
+                    TimeSpan durationOfMove = listaRuchow[i].Czas - listaRuchow[i - 1].Czas;
+                    Console.WriteLine("Duration" + durationOfMove);
+                    time += durationOfMove;
+                    Console.WriteLine("time total" + time);
+                }
+            }
+            return time;
+        }
+
         public void ZapiszGreXml(string filePath)
         {
             try
@@ -170,7 +189,8 @@ namespace Too_little_too_much
 
         public override string ToString()
         {
-            return $"(Status: {StatusGry}, do Odgadniecia: {LiczbaDoOdgadniecia}, count: {listaRuchow.Count()}";
+            return $"(Status: {StatusGry}, do Odgadniecia: {LiczbaDoOdgadniecia}, " +
+                $"count: {listaRuchow.Count()}, Aktualny czas : {AktualnyCzasGry}, Całkowity czas gry {CalkowityCzasGry}";
         }
 
         [DataContract]
