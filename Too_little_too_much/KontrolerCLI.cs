@@ -97,18 +97,15 @@ namespace Too_little_too_much
                 {
                     case ZaDuzo:
                         widok.KomunikatZaDuzo();
-                        Console.WriteLine(gra.ToString());
-                        Console.WriteLine(gra.SumarycznyCzasRuchow());
                         break;
                     case ZaMalo:
                         widok.KomunikatZaMalo();
-                        Console.WriteLine(gra.ToString());
-                        Console.WriteLine(gra.SumarycznyCzasRuchow());
                         break;
                     case Trafiony:
                         TimeSpan sumarycznyCzas = gra.SumarycznyCzasRuchow();
                         widok.KomunikatTrafiono(sumarycznyCzas);
                         Console.WriteLine(gra.SumarycznyCzasRuchow());
+                        StopAutoBackup();
                         File.Delete(PLIK_SAVE);
                         break;
                     default:

@@ -44,9 +44,11 @@ namespace Too_little_too_much
         [DataMember]
         public DateTime? CzasZakonczenia { get; private set; }
 
-        public TimeSpan AktualnyCzasGry => DateTime.Now - CzasRozpoczecia;
-        public TimeSpan CalkowityCzasGry => (StatusGry == Status.WTrakcie) ? AktualnyCzasGry : (TimeSpan)(CzasZakonczenia - CzasRozpoczecia);
+        //public TimeSpan AktualnyCzasGry => DateTime.Now - CzasRozpoczecia;
+        //public TimeSpan CalkowityCzasGry => (StatusGry == Status.WTrakcie) ? AktualnyCzasGry : (TimeSpan)(CzasZakonczenia - CzasRozpoczecia);
 
+        [DataMember]
+        public TimeSpan CalkowityCzasAktywnejGry { get; private set; }
 
         private static readonly byte[] key = Encoding.UTF8.GetBytes("your-encryption-key-1234"); 
         private static readonly byte[] iv = Encoding.UTF8.GetBytes("your-iv-12345678");
@@ -62,6 +64,7 @@ namespace Too_little_too_much
             liczbaDoOdgadniecia = (new Random()).Next(MinLiczbaDoOdgadniecia, MaxLiczbaDoOdgadniecia + 1);
             CzasRozpoczecia = DateTime.Now;
             CzasZakonczenia = null;
+            CalkowityCzasAktywnejGry = TimeSpan.Zero;
             StatusGry = Status.WTrakcie;
 
             listaRuchow = new List<Ruch>();
@@ -118,11 +121,15 @@ namespace Too_little_too_much
         {
             if (index == 0)
             {
-                return listaRuchow[index].Czas - CzasRozpoczecia;
+                TimeSpan czasRuchu = listaRuchow[index].Czas - CzasRozpoczecia;
+                Console.WriteLine($"Czas ruchu dla indeksu 0: {czasRuchu.TotalSeconds} s");
+                return czasRuchu;
             }
             else
             {
-                return listaRuchow[index].Czas - listaRuchow[index -1].Czas;
+                TimeSpan czasRuchu = listaRuchow[index].Czas - listaRuchow[index - 1].Czas;
+                Console.WriteLine($"Czas ruchu dla indeksu {index}: {czasRuchu.TotalSeconds} s");
+                return czasRuchu;
             }
         }
 
@@ -137,10 +144,20 @@ namespace Too_little_too_much
             return time;
         }
 
+        public void ZaktualizujCalkowityCzasAktywnejGry()
+        {
+            if (StatusGry == Status.WTrakcie || StatusGry == Status.Zawieszona)
+            {
+                CalkowityCzasAktywnejGry += DateTime.Now - CzasRozpoczecia;
+                CzasRozpoczecia = DateTime.Now; 
+            }
+        }
+
         public void ZapiszGreXml(string filePath)
         {
             try
             {
+                ZaktualizujCalkowityCzasAktywnejGry();
                 DataContractSerializer serializer = new DataContractSerializer(typeof(Gra));
                 using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
                 {
@@ -149,6 +166,7 @@ namespace Too_little_too_much
                         using (XmlWriter xmlWriter = XmlWriter.Create(crypto))
                         {
                             serializer.WriteObject(xmlWriter, this);
+
                         }
                     }
 
@@ -169,7 +187,9 @@ namespace Too_little_too_much
                 {
                     using (CryptoStream crypto = CreateCryptoStream(fileStream, key, iv, CryptoStreamMode.Read))
                     {
-                        return (Gra)serializer.ReadObject(crypto);
+                        Gra gra = (Gra)serializer.ReadObject(crypto);
+                        gra.CzasRozpoczecia = DateTime.Now;
+                        return gra;
                     }
                 }
 
@@ -193,8 +213,7 @@ namespace Too_little_too_much
 
         public override string ToString()
         {
-            return $"(Status: {StatusGry}, do Odgadniecia: {LiczbaDoOdgadniecia}, " +
-                $"count: {listaRuchow.Count()}, Aktualny czas : {AktualnyCzasGry}, Całkowity czas gry {CalkowityCzasGry}";
+            return $"(Status: {StatusGry}, do Odgadniecia: {LiczbaDoOdgadniecia}, count: {listaRuchow.Count()}, Calkowity czas aktywnej gry: {CalkowityCzasAktywnejGry})";
         }
 
         [DataContract]

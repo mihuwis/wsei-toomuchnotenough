@@ -78,7 +78,7 @@ namespace Too_little_too_much
             int i = 1;
             foreach (var ruch in kontroler.ListaRuchow)
             {
-                TimeSpan czasRuchu = kontroler.gra.ObliczCzasRuchu(i-1);
+                TimeSpan czasRuchu = kontroler.gra.ObliczCzasRuchu(i - 1);
                 WriteLine($"{i}     {ruch.Liczba}      {ruch.Wynik}      {czasRuchu.TotalSeconds} s     {ruch.StatusGry}");
                 i++;
             }
@@ -102,7 +102,7 @@ namespace Too_little_too_much
         {
             Console.ForegroundColor = ConsoleColor.Green;
             WriteLine("Trafiono!");
-            WriteLine($"Czas gry: {sumarycznyCzasGry} sekund");
+            WriteLine($"Czas gry: {sumarycznyCzasGry.TotalSeconds} sekund");
             Console.ResetColor();
         }
     }
